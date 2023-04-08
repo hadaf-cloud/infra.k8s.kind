@@ -1,0 +1,65 @@
+# cluster-config.yml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+
+networking:
+  # WARNING: It is _strongly_ recommended that you keep this the default
+  # (127.0.0.1) for security reasons. However it is possible to change this.
+  # apiServerAddress: "192.168.1.100"
+  # By default the API server listens on a random open port.
+  # You may choose a specific port but probably don't need to in most cases.
+  # Using a random port makes it easier to spin up multiple clusters.
+  apiServerPort: 6443
+
+nodes:
+  - role: control-plane
+    extraMounts:
+      - hostPath: /home/masoud/kind/kind-control-plane
+        containerPath: /var/local-path-provisioner/
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
+  - role: worker
+    extraMounts:
+      - hostPath: /home/masoud/kind/kind-worker
+        containerPath: /var/local-path-provisioner/
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 81
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 4431
+        protocol: TCP
+  - role: worker
+    extraMounts:
+      - hostPath: /home/masoud/kind/kind-worker2
+        containerPath: /var/local-path-provisioner/
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 82
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 4432
+        protocol: TCP
